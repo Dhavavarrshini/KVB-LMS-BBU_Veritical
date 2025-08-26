@@ -4,6 +4,9 @@ import com.microsoft.playwright.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 
+import com.kvb.lms.bbu.utils.EmailSender;
+import io.cucumber.java.AfterAll;
+
 public class Hooks {
 
     private static Playwright playwright;
@@ -37,4 +40,15 @@ public class Hooks {
         }
         System.out.println("✅ Playwright resources closed.");
     }
+
+    @AfterAll
+    public static void sendReportEmail() {
+        String reportPath = System.getProperty("user.dir") + "/target/cucumber-reports/report.html";
+        EmailSender.sendReport(
+                "dhavavarrshini.m@pentafox.in",
+                "C:\\Users\\dhava\\IdeaProjects\\KVB-LMS BBU_Vertical\\target\\cucumber-reports"
+        );
+
+    }
 }
+

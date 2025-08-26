@@ -56,7 +56,7 @@ public class LoginSteps {
     }
 
     // ✅ Invalid username + Invalid password
-    @When("the user enters invalid username and password")
+    @When("the user enters invalid username and invalid password")
     public void userEntersInvalidCredentials() {
         loginPage.enterEmpID("WrongUser");
         loginPage.enterPassword("WrongPass");
