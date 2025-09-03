@@ -43,12 +43,14 @@ public class Hooks {
 
     @AfterAll
     public static void sendReportEmail() {
-        String reportPath = System.getProperty("user.dir") + "/target/cucumber-reports/report.html";
+        // Correct path for single HTML file
+        String reportPath = System.getProperty("user.dir") + "/target/cucumber-reports.html";
+
         EmailSender.sendReport(
                 "dhavavarrshini.m@pentafox.in",
-                "C:\\Users\\dhava\\IdeaProjects\\KVB-LMS BBU_Vertical\\target\\cucumber-reports"
+                reportPath
         );
-
     }
-}
 
+
+}

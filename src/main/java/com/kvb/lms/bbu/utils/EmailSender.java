@@ -1,82 +1,73 @@
 package com.kvb.lms.bbu.utils;
 
-import javax.activation.*;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class EmailSender {
 
-    public static void sendReport(String toEmail, String reportFolderPath) {
-        final String fromEmail = "dhavavarrshini@gmail.com"; // your Gmail
-        final String password = "kvpq uinm sciu zngs"; // App Password (not Gmail login)
+    public static void sendReport(String toEmail, String reportFilePath) {
+        // Gmail SMTP settings
+        final String fromEmail = "dhavavarrshini@gmail.com"; // replace with your Gmail
+        final String appPassword = "kvpq uinm sciu zngs"; // replace with your Gmail App Password
 
-        // SMTP setup
+        // Check if file exists
+        File reportFile = new File(reportFilePath);
+        if (!reportFile.exists()) {
+            throw new RuntimeException("Report file not found: " + reportFilePath);
+        }
+
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
 
-        Session session = Session.getInstance(props, new Authenticator() {
+        // Session with authentication
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, password);
+                return new PasswordAuthentication(fromEmail, appPassword);
             }
         });
 
         try {
-            // 1️⃣ Zip the cucumber-reports folder
-            String zipFilePath = reportFolderPath + ".zip";
-            zipFolder(Paths.get(reportFolderPath), Paths.get(zipFilePath));
+            // Create email
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.setRecipients(
+                    Message.RecipientType.TO,
+                    InternetAddress.parse(toEmail)
+            );
+            message.setSubject("Automation Test Report");
 
-            // 2️⃣ Create Email
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(fromEmail));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            msg.setSubject("Automation Test Report");
+            // Email body
+            MimeBodyPart textPart = new MimeBodyPart();
+            textPart.setText("Hi Team,\n\nPlease find the attached Automation Test Report.\n\nRegards,\nAutomation Bot");
 
-            // Body
-            MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setText("Hi Team,\n\nPlease find the attached automation test report.\n\nRegards,\ndhava");
-
-            // Attachment (zip file)
+            // Attachment (HTML Report)
             MimeBodyPart attachmentPart = new MimeBodyPart();
-            DataSource source = new FileDataSource(zipFilePath);
+            DataSource source = new FileDataSource(reportFile);
             attachmentPart.setDataHandler(new DataHandler(source));
-            attachmentPart.setFileName("AutomationReport.zip");
+            attachmentPart.setFileName("AutomationReport.html");
 
+            // Combine parts
             Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(messageBodyPart);
+            multipart.addBodyPart(textPart);
             multipart.addBodyPart(attachmentPart);
 
-            msg.setContent(multipart);
+            message.setContent(multipart);
 
-            // 3️⃣ Send email
-            Transport.send(msg);
-            System.out.println("Report emailed successfully with ZIP attachment!");
+            // Send email
+            Transport.send(message);
+            System.out.println("✅ Report emailed successfully to " + toEmail);
 
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             e.printStackTrace();
-        }
-    }
-
-    // Helper method to zip folder
-    private static void zipFolder(Path sourceFolder, Path zipFilePath) throws IOException {
-        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
-            Files.walk(sourceFolder).filter(path -> !Files.isDirectory(path)).forEach(path -> {
-                ZipEntry zipEntry = new ZipEntry(sourceFolder.relativize(path).toString());
-                try {
-                    zos.putNextEntry(zipEntry);
-                    Files.copy(path, zos);
-                    zos.closeEntry();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
 }
