@@ -6,6 +6,7 @@ import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 public class EmailSender {
@@ -44,22 +45,29 @@ public class EmailSender {
             );
             message.setSubject("Automation Test Report");
 
-            // Email body
+            // Plain text intro
             MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setText("Hi Team,\n\nPlease find the attached Automation Test Report.\n\nRegards,\nAutomation Bot");
+            textPart.setText("Hi Team,\n\nPlease find the Automation Test Report below and attached.\n\nRegards,\nAutomation Bot");
 
-            // Attachment (HTML Report)
+            // Embed HTML in email body
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            String htmlContent = new String(java.nio.file.Files.readAllBytes(reportFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+            htmlPart.setContent(htmlContent, "text/html; charset=utf-8");
+
+            // Attach HTML as file too
             MimeBodyPart attachmentPart = new MimeBodyPart();
             DataSource source = new FileDataSource(reportFile);
             attachmentPart.setDataHandler(new DataHandler(source));
             attachmentPart.setFileName("AutomationReport.html");
 
-            // Combine parts
+            // Combine all
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(textPart);
+            multipart.addBodyPart(htmlPart);
             multipart.addBodyPart(attachmentPart);
 
             message.setContent(multipart);
+
 
             // Send email
             Transport.send(message);
@@ -68,6 +76,8 @@ public class EmailSender {
         } catch (MessagingException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to send email: " + e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
