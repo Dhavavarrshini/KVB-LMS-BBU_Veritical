@@ -29,6 +29,8 @@ public class AssignedLeadsSteps {
         assignedLeadsPage.enterPromoterName("Varshini");
         assignedLeadsPage.enterPromoterDesignation("Analyst");
         assignedLeadsPage.selectLeadSource();
+        assignedLeadsPage.enterPhoneNumber1("6381214124");
+        assignedLeadsPage.selectLocation();
         log.info("Filled lead details and clicked save");
     }
 
