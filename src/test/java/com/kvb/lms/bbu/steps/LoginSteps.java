@@ -22,7 +22,7 @@ public class LoginSteps {
     // ✅ Valid login
     @When("the user enters valid username and password")
     public void userEntersValidCredentials() {
-        loginPage.enterEmpID("PENTA009");
+        loginPage.enterEmpID("PENTA099");
         loginPage.enterPassword("kvb@1234");
     }
 
@@ -34,7 +34,7 @@ public class LoginSteps {
     // ✅ Valid username + Invalid password
     @When("the user enters valid username and invalid password")
     public void userEntersValidUsernameInvalidPassword() {
-        loginPage.enterEmpID("PENTA009");
+        loginPage.enterEmpID("PENTA099");
         loginPage.enterPassword("wrongPassword");
     }
 

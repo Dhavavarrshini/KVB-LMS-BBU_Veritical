@@ -1,4 +1,9 @@
-Feature: New Lead Creation
+Feature: Assigned Leads management
+
+  Background:
+    Given user navigates to the login page
+    When the user enters valid username and password
+    Then the user should be logged in successfully
 
   @LeadCreationByFillingAllTheFields
   Scenario: Create a new Lead by filling all the fields
